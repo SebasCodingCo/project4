@@ -11,9 +11,40 @@ are nulified on top of the fact that adjacency lists are more space efficient.
 #include <map>
 //for the pseudo code implementation from piazza
 #include <tuple>
+#include <queue>
+#include <set>
 
 using namespace std;
 // Main Execution
+
+//following the pseudo code implementation from the shortest path on piazza
+map<int,int> dijkstra(map<int, vector<int>> graph, vector<int> vals, int node){
+    //the tuple stores trios of cost, name, and the 
+    //looked up how to make a priority queue a min heap on geeks for geeks and made it hold tuples
+    priority_queue<tuple<int, int, int>, vector<tuple<int,int,int>>, greater<tuple<int,int,int>>> frontier;
+    //marked stores the node and the cost
+    map<int, int> marked;
+    //create the first tuple in frontier so we can just continuously go through the 
+    //while loop until the shortest path to each is found
+    frontier.push(make_tuple(0, node, node));
+    while(!frontier.empty()){
+        //tuple top = frontier.top();
+        node = get<2>(frontier.top());
+        frontier.pop();
+        //check if it is in marked
+        if(marked.count(node) == 0){
+            //vals[node] is the cost of going into the current node
+            marked[node] = vals[node];
+            for(size_t i = 0; i < graph[node].size(); i ++){
+                //graph[node][i] is the node connecting to current node
+                //vals[graph[node][i]] is the cost of the node connecting to the current node 
+                //frontier push tuple (u.cost + v.cost, v.name, u.name)
+                frontier.push(make_tuple(vals[graph[node][i]] + vals[node], node, graph[node][i]));
+            }
+        }
+    }
+    return marked;
+}
 
 int main(int argc, char *argv[]) {
     int numOfTiles;
@@ -35,7 +66,7 @@ int main(int argc, char *argv[]) {
 
     //int might have to be changed in this unordered map depending on how we want to store each node
     // first int is the current value, second is the value it wants to go to
-    map<int, multimap<int, int>> graphList;
+    map<int, vector<int>> graphList;
     //create the vector with a number of nodes = rows *columns
     vector<int> mapVals;
     for(int i = 0; i < columns*rows; i++){
@@ -48,32 +79,33 @@ int main(int argc, char *argv[]) {
     for(int i = 0; i < columns*rows; i++){
         //connect each tile to the other tiles and connect them to their value
         //connect the node to the upper
-        cout << "Inserting connections for node " << i << ": ";
 
         if(i/rows != 0){
-            cout << "Up: " << i - columns << " ";
             //i-rows bc this would be directly one above it in the map
-            graphList[i].insert({mapVals[i-rows], i-rows});
+            graphList[i].push_back(i-rows);
         }
         //connect node to the lower
         if(i/rows != rows - 1){
-            graphList[i].insert({mapVals[i+rows],i+rows});
-            cout << "Down: " << i + columns << " ";
+            graphList[i].push_back(i+rows);
         }
         //checks if this node should connect to the node to the left
         if(i % columns != 0){
             //adds the weight of the node to the left and the node to the left to the node
-            graphList[i].insert({mapVals[i-1],i-1});
-            cout << "Left: " << i - 1 << " ";
+            graphList[i].push_back(i-1);
         }
         //connect node to the right
         if(i % columns != columns - 1){
             //columns - 1 bc this would be furthest right
-            cout << "Right: " << i + 1 << " ";
-            graphList[i].insert({mapVals[i+1], i+1});
+            graphList[i].push_back(i+1);
         }
-        cout << endl;
     }
+    map<int,int> pathCost = dijkstra(graphList,mapVals, 0);
+    map<int,int> :: iterator i;
+	//go through every piece of information going from artist down to song
+	for(i = pathCost.begin(); i != pathCost.end(); i++){
+        cout << i->first << ":" << i->second << endl;
+	}
+
 
     //prints out the map in the value form
     /*for(int i = 0; i < rows; i++){
@@ -83,13 +115,14 @@ int main(int argc, char *argv[]) {
         cout << endl;
     }*/
     
-    for (const auto& outerpair : graphList) {
+    //prints nodes and the edges they have connections to in the graph
+    /*for (const auto& outerpair : graphList) {
         cout << outerpair.first << "| ";
         for (const auto& innerpair : outerpair.second) {
-            cout << innerpair.first << ":" << innerpair.second << " ";
+            cout << innerpair << " ";
         }
         cout << endl;
-    }   
+    }*/   
 
     //just to do the test get rid of this or edit it
     int row,column;
@@ -97,4 +130,5 @@ int main(int argc, char *argv[]) {
     cin >> row >> column;
     return 0;
 }
+
 
