@@ -27,19 +27,22 @@ map<int,int> dijkstra(map<int, vector<int>> graph, vector<int> vals, int node){
     //create the first tuple in frontier so we can just continuously go through the 
     //while loop until the shortest path to each is found
     frontier.push(make_tuple(0, node, node));
+
     while(!frontier.empty()){
-        //tuple top = frontier.top();
-        node = get<2>(frontier.top());
+	       
+        tuple <int,int,int> top = frontier.top();
+        node = get<1>(top);
         frontier.pop();
-        //check if it is in marked
+        //continue if node is not in marked
         if(marked.count(node) == 0){
             //vals[node] is the cost of going into the current node
-            marked[node] = vals[node];
+            
+            marked[node] = get<2>(top);
             for(size_t i = 0; i < graph[node].size(); i ++){
                 //graph[node][i] is the node connecting to current node
                 //vals[graph[node][i]] is the cost of the node connecting to the current node 
                 //frontier push tuple (u.cost + v.cost, v.name, u.name)
-                frontier.push(make_tuple(vals[graph[node][i]] + vals[node], node, graph[node][i]));
+                frontier.push(make_tuple(vals[graph[node][i]] + vals[node], graph[node][i], node));
             }
         }
     }
@@ -99,13 +102,30 @@ int main(int argc, char *argv[]) {
             graphList[i].push_back(i+1);
         }
     }
-    map<int,int> pathCost = dijkstra(graphList,mapVals, 0);
+    int row1,column1,row2,column2;
+    cin >> row1 >> column1;
+    //row1*rows +columns is where our beginning node should be
+    map<int,int> pathCost = dijkstra(graphList,mapVals, (row1*rows + column1));
+    cin >> row2 >> column2;
+
+    //could be row2*columns need to check
+    int endNode = row2*rows + column2;
+
+    //go until row2 column2 reaches the original node
     map<int,int> :: iterator i;
 	//go through every piece of information going from artist down to song
 	for(i = pathCost.begin(); i != pathCost.end(); i++){
         cout << i->first << ":" << i->second << endl;
 	}
-
+    int totalCost = 0;
+    int currentNode = endNode;
+    cout << currentNode/rows << " " << currentNode%columns << endl;
+    while(currentNode != (row1*rows + column1)){
+        currentNode = pathCost[currentNode];
+        totalCost+= mapVals[currentNode];
+        cout << currentNode/rows << " " << currentNode%columns << endl;
+    }
+    cout << totalCost << endl;
 
     //prints out the map in the value form
     /*for(int i = 0; i < rows; i++){
@@ -125,10 +145,9 @@ int main(int argc, char *argv[]) {
     }*/   
 
     //just to do the test get rid of this or edit it
-    int row,column;
-    cin >> row >> column;
-    cin >> row >> column;
+    
     return 0;
 }
+
 
 
