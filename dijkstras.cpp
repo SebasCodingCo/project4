@@ -21,10 +21,12 @@ map<int,int> dijkstra(map<int, vector<int>> graph, vector<int> vals, int node){
     //the tuple stores trios of cost, name, and the 
     //looked up how to make a priority queue a min heap on geeks for geeks and made it hold tuples
     priority_queue<tuple<int, int, int>, vector<tuple<int,int,int>>, greater<tuple<int,int,int>>> frontier;
+
     //marked stores the node and the cost to get there, realized we need the cost to find the smallest path
     map<int, int> marked;
     //path should store the node and who it is coming from
     map<int,int> path;
+
     //create the first tuple in frontier so we can just continuously go through the 
     //while loop until the shortest path to each is found
     frontier.push(make_tuple(0, node, node));
@@ -118,22 +120,30 @@ int main(int argc, char *argv[]) {
 
     int endNode = row2*columns + column2;
 
-    map<int,int> :: iterator i;
+    //prints links and shows where they connect
+    /*map<int,int> :: iterator i;
 	for(i = path.begin(); i != path.end(); i++){
         cout << i->first << ":" << i->second << endl;
-	}
+	}*/
 
-    vector<int> path;
+    vector<int> pathing;
+
     int totalCost = 0;
     int currentNode = endNode;
+
+    pathing.push_back(currentNode);
     //go until row2 column2 reaches the original node
     while(currentNode != (row1*rows + column1)){
         currentNode = path[currentNode];
         //cout << "added " << mapVals[currentNode] << endl;
         totalCost+= mapVals[currentNode];
         //cout << currentNode/rows << " " << currentNode%columns << endl;
+        pathing.push_back(currentNode);
     }
     cout << totalCost << endl;
+    for(int j = pathing.size() - 1; j >= 0; j--){
+        cout << pathing[j]/rows << " " << pathing[j]%columns << endl;
+    }
 
     //prints out the map in the value form so I can visualize pathing
     /*for(int i = 0; i < rows; i++){
@@ -142,14 +152,8 @@ int main(int argc, char *argv[]) {
         }
         cout << endl;
     }*/
-    //prints nodes and the edges they have connections to in the graph
-    /*for (const auto& outerpair : graphList) {
-        cout << outerpair.first << "| ";
-        for (const auto& innerpair : outerpair.second) {
-            cout << innerpair << " ";
-        }
-        cout << endl;
-    }*/   
     return 0;
 }
+
+
 
