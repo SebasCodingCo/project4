@@ -12,7 +12,6 @@ are nulified on top of the fact that adjacency lists are more space efficient.
 //for the pseudo code implementation from piazza
 #include <tuple>
 #include <queue>
-#include <set>
 
 using namespace std;
 // Main Execution
@@ -29,7 +28,6 @@ map<int,int> dijkstra(map<int, vector<int>> graph, vector<int> vals, int node){
     //create the first tuple in frontier so we can just continuously go through the 
     //while loop until the shortest path to each is found
     frontier.push(make_tuple(0, node, node));
-    path[0] = 0;
 
     while(!frontier.empty()){
         tuple <int,int,int> top = frontier.top();
@@ -40,17 +38,15 @@ map<int,int> dijkstra(map<int, vector<int>> graph, vector<int> vals, int node){
             //vals[node] is the cost of getting into the current node            
             marked[node] = get<0>(top);
             for(int u: graph[node]){
-                //need a conditional because we don't want to add to a value that has already unless it is a shorter path
-                //graph[node][i] is the node connecting to current node
-                //vals[graph[node][i]] is the cost of the node connecting to the current node 
-                //frontier push tuple (u.cost + v.cost, v.name, u.name)
+                //u = all the nodes that connect to the current node
                 if(marked.count(u) == 0){
+                    //frontier push tuple (u.cost + v.cost, u.name, v.name)
+                    //marked[node] = the total cost to get to the node
                     frontier.push(make_tuple(vals[u] + marked[node], u, node));
-                    path[u] = node;
-                }
-                else if((vals[u] + marked[node]) < marked[u]){
-                    frontier.push(make_tuple(vals[u] + marked[node], u, node));       
-                    path[u] = node;            
+                    //don't change path to u if we already have gone to it
+                    if(path.count(u) == 0){
+                        path[u] = node;
+                    }
                 }
                 
             }
@@ -113,35 +109,33 @@ int main(int argc, char *argv[]) {
             graphList[i].push_back(i+1);
         }
     }
+
     int row1,column1,row2,column2;
     cin >> row1 >> column1;
     //row1*rows +columns is where our beginning node should be
     map<int,int> path = dijkstra(graphList,mapVals, (row1*rows + column1));
     cin >> row2 >> column2;
 
-    //could be row2*columns need to check
-    int endNode = row2*rows + column2;
+    int endNode = row2*columns + column2;
 
-    //go until row2 column2 reaches the original node
     map<int,int> :: iterator i;
-	//go through every piece of information going from artist down to song
 	for(i = path.begin(); i != path.end(); i++){
         cout << i->first << ":" << i->second << endl;
 	}
 
+    vector<int> path;
     int totalCost = 0;
     int currentNode = endNode;
-    cout << currentNode/rows << " " << currentNode%columns << endl;
-    //this is to get the path from start node to end node
+    //go until row2 column2 reaches the original node
     while(currentNode != (row1*rows + column1)){
         currentNode = path[currentNode];
         //cout << "added " << mapVals[currentNode] << endl;
         totalCost+= mapVals[currentNode];
-        cout << currentNode/rows << " " << currentNode%columns << endl;
+        //cout << currentNode/rows << " " << currentNode%columns << endl;
     }
     cout << totalCost << endl;
 
-    //prints out the map in the value form
+    //prints out the map in the value form so I can visualize pathing
     /*for(int i = 0; i < rows; i++){
         for(int j = 0; j < columns; j++){
             cout << mapVals[i*rows + j] << " ";
@@ -158,6 +152,4 @@ int main(int argc, char *argv[]) {
     }*/   
     return 0;
 }
-
-
 
